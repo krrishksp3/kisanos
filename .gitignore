@@ -1,0 +1,41 @@
+# Git Ignore for KisanOS (Monorepo: FastAPI + Next.js)
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+*.db
+*.sqlite3
+backend/kisanos_dev.db
+backend/uploads/
+backend/.env
+.venv/
+env/
+venv/
+
+# Node / Next.js
+frontend/node_modules/
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env.local
+frontend/.env*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment & Secret files
+*.env
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

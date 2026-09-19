@@ -1,0 +1,64 @@
+# KisanOS AI — Production Render Blueprint Specification
+# Architecture: PostgreSQL Database + FastAPI Backend + Next.js Frontend
+version: "1"
+
+databases:
+  - name: kisanos-db
+    databaseName: kisanos
+    user: kisanos_admin
+    plan: free
+    region: oregon
+    postgresMajorVersion: 16
+
+services:
+  # ----------------------------------------------------
+  # Service 1: KisanOS FastAPI Backend
+  # ----------------------------------------------------
+  - type: web
+    name: kisanos-backend
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && python -m app.data.seed && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kisanos-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: ALLOW_SQLITE_FALLBACK
+        value: "False"
+      - key: CORS_ORIGINS
+        value: "http://localhost:3000,http://127.0.0.1:3000"
+
+  # ----------------------------------------------------
+  # Service 2: KisanOS Next.js Frontend
+  # ----------------------------------------------------
+  - type: web
+    name: kisanos-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: kisanos-backend
+          property: host
+      - key: NEXT_PUBLIC_APP_NAME
+        value: "KisanOS AI"
+      - key: NEXT_PUBLIC_DEFAULT_LANG
+        value: "hi"
+      - key: PORT
+        value: "10000"
